@@ -1,12 +1,17 @@
 #include "Patient.h"
+#include <pqxx/pqxx>
+
 
 class DataBaseWorker
 {
 private:
-    std::string _path;
-
+    pqxx::connection _conn;
 
 public:
     
+    DataBaseWorker();
+    void AddVisit(Visit& vis);
+    Patient GetPatient(int id);
+
 
 };

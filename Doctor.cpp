@@ -10,6 +10,7 @@ void ConnectionHandler::Doctor::AddHS(std::string hs){
 
 void ConnectionHandler::Doctor::AddDrug(std::string drug){
     _visit.Drugs.emplace_back(drug);
+    
 }
 
 void ConnectionHandler::Doctor::SetAnamnes(std::string an){
