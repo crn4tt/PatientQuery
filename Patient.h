@@ -4,16 +4,21 @@
 
 class Patient{
 private:
-    std::string _id;
+    int _id;
 
 public:
+    Patient(int id, std::string name, std::string surname, std::string patronomyc, std::string born_date, std::string gender, int last_visit);
+
     std::vector<Visit> History;
-    
+
     std::string Name;
-    std::string LastName;
+    std::string Surname;
     std::string Patronomyc;
-
     std::string BornDate;
+    std::string Gender;
+    int LastVisit;
 
-    std::string ToString();
+    void Print();
+    
+    int GetID();
 };
