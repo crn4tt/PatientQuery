@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-void Visit::Print(){
+void Visit::Print() const {
 
     std::cout << "Pills:\n";
     for (size_t i = 0; i < Drugs.size(); i++)

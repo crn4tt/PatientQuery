@@ -1,7 +1,16 @@
 #include "Patient.h"
 
 
-Patient::Patient(int id, std::string name, std::string surname, std::string patronomyc, std::string born_date, std::string gender, int last_visit){
+Patient::Patient(){
+    _id = 0;
+    Name = "";
+    Surname = "";
+    Patronomyc = "";
+    BornDate = "";
+    Gender = "";
+}
+
+Patient::Patient(int id, std::string name, std::string surname, std::string patronomyc, std::string born_date, std::string gender){
 
     _id = id;
     Name = name;
@@ -9,7 +18,6 @@ Patient::Patient(int id, std::string name, std::string surname, std::string patr
     Patronomyc = patronomyc;
     BornDate = born_date;
     Gender = gender;
-    LastVisit = last_visit;
 
 }
 

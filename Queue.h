@@ -1,9 +1,10 @@
+#pragma once
+
 template <typename T>
 class Queue
 {
 private:
 
-    template <typename T>
     struct Node{
         T Data;
         Node* Next;
@@ -14,8 +15,8 @@ private:
         }
     };
 
-    Node<T>* _head;
-    Node<T>* _tail;
+    Node* _head;
+    Node* _tail;
     size_t _size;
 
 public:
@@ -32,46 +33,42 @@ public:
 
     void Push(T data) {
         if (_head == nullptr) {
-            _head = new Node<T>(data);
+            _head = new Node(data);
             _tail = _head;
             
         } else {
-            _tail->Next = new Node<T>(data);
+            _tail->Next = new Node(data);
             _tail = _tail->Next;
         }
         _size++;
     }
 
 
+    
     void Pop() {
         if (IsEmpty()) throw "Queue is empty";
-
-        Node<T>* tmp = _head;
-        delete _head;
-        _head = tmp->Next;
-        delete tmp;        
-        _size -= 1;
-
-        if (!_head) _tail = nullptr;
-
-        return;
-    };
-
+    
+        Node* tmp = _head;     
+        _head = _head->Next;     
+        delete tmp;            
+        _size--;
+    
+        if (_head == nullptr) {  
+            _tail = nullptr;
+        }
+    }
+    
+    ~Queue() {
+        while (!IsEmpty()) {
+            Pop(); 
+        }
+    }
+    
     T Front(){
         return _head->Data;
     }
 
-    ~Queue(){
-        Node<T>* tmp = _head;
-        Node<T>* cur = _head->Next;
-        for (size_t i = 0; i < _size; i++) {
-            delete tmp;
-            if (cur->Next == nullptr) break;
-            tmp = cur;
-            cur = cur->Next;
-        }
-        delete cur;
-    }
-
-
+ 
+    
+    
 };

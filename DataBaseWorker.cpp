@@ -1,63 +1,26 @@
 #include "DataBaseWorker.h"
 
 
-DataBaseWorker::DataBaseWorker(){
+DataBaseWorker::DataBaseWorker(const std::string& connection_string) : _conn(std::make_shared<pqxx::connection>(connection_string)){
 
-    std::string connection = "host=85.192.29.145 "
-    "port=5432 ";
-    std::string tmp;
+    try {
+        _conn = std::make_shared<pqxx::connection>(connection_string);
+        
+    } catch (const std::exception& e) {
 
-    std::cout << " Write database name: " << std::endl;
-
-    std::cin >> tmp;
-    std::cout << '\n';
-    
-    connection += tmp + " ";
-
-    std::cout << " Write username: " << std::endl;
-    std::cin >> tmp;
-    std::cout << '\n';
-    
-    connection += tmp + " ";
-
-
-    std::cout << " Password: " << std::endl;
-    std::cin >> tmp;
-    std::cout << '\n';
-    
-    connection += tmp + " ";
-
-    _conn = pqxx::connection(connection);
-    if(!_conn.is_open()){
-        throw "db connection failed!";
+        std::cerr << "Connection failed: " << e.what() << std::endl;
+        throw;
     }
 
 }
 
 
 
-void DataBaseWorker::AddVisit(Visit& vis, Patient& pat, int visit_id) {
+void DataBaseWorker::AddVisit(const std::string& drugs, const std::string& diagnosis, Patient& pat, int visit_id, const std::string& date) {
     try {
-        std::string drugs;
-        for(std::string str : vis.Drugs){
-            drugs += str + ",";
-        }
-        drugs[drugs.size() - 1] = ' ';
-
-        std::string diagnosis;
-        std::cout << "Write diagnosis: \n";
-        getline(std::cin, diagnosis);
-        std::cout << "\n";
-
-        std::string date;
-        std::cout << "Write date(yyyy-mm-dd): \n";
-        getline(std::cin, date);
-        std::cout << " \n";
-
-
-        pqxx::work txn(_conn);
+        pqxx::work txn(*_conn);
         txn.exec_params(
-            "INSERT INTO Patients (visit_id, pat_id, visit_date, diagnosis, dugs) "
+            "INSERT INTO visits (visit_id, pat_id, visit_date, diagnosis, drugs) "
             "VALUES ($1, $2, $3, $4, $5)",
             visit_id,
             pat.GetID(),
@@ -73,30 +36,23 @@ void DataBaseWorker::AddVisit(Visit& vis, Patient& pat, int visit_id) {
     }
 }
 
-Patient DataBaseWorker::GetPatient(int ID) {
+void DataBaseWorker::GetPatients(Queue<Patient>& result) {
     try {
-        pqxx::work txn(_conn);
-        pqxx::result result = txn.exec_params(
-            "SELECT pat_id, name, surname, patronomic, born_date, gender, last_visit "
-            "FROM patients "
-            "WHERE pat_id = $1",
-            ID
-        );
-
-        if (result.empty()) {
-            throw std::runtime_error("Patient not found");
+        pqxx::work txn(*_conn);
+        pqxx::result res = txn.exec("SELECT * FROM patients");
+        for (const auto& row : res) {
+            Patient current_row = Patient(
+                row["pat_id"].as<int>(),
+                row["name"].as<std::string>(),
+                row["surname"].as<std::string>(),
+                row["patronomic"].as<std::string>(),
+                row["born_date"].as<std::string>(),
+                row["gender"].as<std::string>()
+            );
+            result.Push(current_row);
         }
-
-        const auto& row = result[0];
-        return Patient(
-            row["pat_id"].as<int>(),
-            row["name"].as<std::string>(),
-            row["surname"].as<std::string>(),
-            row["patronomic"].as<std::string>(),
-            row["born_date"].as<std::string>(),
-            row["gender"].as<std::string>(),
-            row["last_visit"].as<int>()
-        );
+        
+        txn.commit();
     }
     catch (const std::exception& e) {
         std::cerr << "Error getting patient: " << e.what() << std::endl;
@@ -104,17 +60,59 @@ Patient DataBaseWorker::GetPatient(int ID) {
     }
 }
 
-size_t DataBaseWorker::GetPatientsCount() {
+size_t DataBaseWorker::GetVisitsCount() {
     try {
-    pqxx::work txn(_conn);
-    std::string query = "SELECT COUNT(*) FROM patients";
-    pqxx::result result = txn.exec(query);
-    return txn.query_value<size_t>(query);
+        pqxx::work txn(*_conn);
+        pqxx::result result = txn.exec("SELECT COUNT(*) FROM visits");
+        return result[0][0].as<size_t>();
     }
     catch(const std::exception& e) {
-        std::cerr << "Error getting patients count: " << e.what() << std::endl;
+        std::cerr << "Error getting patients: " << e.what() << std::endl;
         throw;
     }
 }
 
-//+ make getVisit to know about patient problem.
+Visit DataBaseWorker::GetHistory(Patient pat){
+   try{ 
+        pqxx::work txn(*_conn);
+        
+        Visit result;
+        pqxx::result res = txn.exec_params("SELECT * FROM visits WHERE pat_id=$1", pat.GetID());
+
+
+        for (const auto& row : res) {
+            
+            std::string drugs = row["drugs"].is_null() ? "" : row["drugs"].as<std::string>();
+            result.Drugs.emplace_back(drugs);
+
+            std::string hist = row["diagnosis"].is_null() ? "" : row["diagnosis"].as<std::string>();
+            result.History.emplace_back(hist);
+        }
+
+        txn.commit();
+        return result;
+    }
+    catch(const std::exception& e) {
+        std::cerr << "Error getting patient's history: " << e.what() << std::endl;
+        throw;
+    }
+}
+
+
+void DataBaseWorker::DeletePatient(Patient& pat){
+    try {
+        pqxx::work txn(*_conn);
+        
+        txn.exec_params(
+            "DELETE FROM patients WHERE pat_id=$1",
+            pat.GetID()
+        );
+
+        txn.commit();
+        
+    }
+    catch(const std::exception& e) {
+        std::cerr << "Error delete patient: " << e.what() << std::endl;
+        throw;
+    }
+}

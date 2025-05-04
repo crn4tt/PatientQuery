@@ -1,21 +1,35 @@
 #include "PatientQueue.h"
 
-PatientQueue::PatientQueue():_queuePatient(), _dataBase(){    int num = _dataBase.GetPatientsCount();
-    for (int i = 0; i < num; i++)
-        _queuePatient.Push(_dataBase.GetPatient(i));    
+
+
+PatientQueue::PatientQueue(DataBaseWorker& dbw):_queuePatient(){   
+    dbw.GetPatients(_queuePatient);
 
 } 
 
-
-Patient PatientQueue::GetPatients(){
+Patient PatientQueue::GetPatient(DataBaseWorker& dbw){
     _queuePatient.Front().Print();
 
-    std::vector<Visit> visits = _dataBase.GetHistory(_queuePatient.Front().GetID());
-    int i = visits.size();
-    
-    while (i--){
-        visits[i].Print();
-    }
-
+    Visit visits = dbw.GetHistory(_queuePatient.Front());
+    visits.Print();
+    _queuePatient.Front().History.emplace_back(visits);
     return _queuePatient.Front();
+}
+
+size_t PatientQueue::GetVisitsCount(DataBaseWorker& dbw){
+    return dbw.GetVisitsCount();
+}
+
+void PatientQueue::FreePatient(DataBaseWorker& dbw){
+    Patient pat = _queuePatient.Front();
+    dbw.DeletePatient(pat);
+    _queuePatient.Pop();
+}
+
+void PatientQueue::SendVisit(DataBaseWorker& dbw, std::string& drugs, std::string& diag, Patient pat, int visit_id, std::string& date){
+    dbw.AddVisit(drugs, diag, pat, visit_id, date);
+}
+
+bool PatientQueue::IsEmpty(){
+    return _queuePatient.IsEmpty();
 }

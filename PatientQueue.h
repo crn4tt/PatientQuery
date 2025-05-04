@@ -1,19 +1,21 @@
+#pragma once
 #include "Patient.h"
 #include "Queue.h"
 #include "DataBaseWorker.h"
 
-class PatientQueue
-{
+class PatientQueue {
 private:
-    DataBaseWorker _dataBase;
     Queue<Patient> _queuePatient;
 
 public:
-    PatientQueue(); 
+    explicit PatientQueue(DataBaseWorker& dbw); 
 
-    Patient GetPatients();
-    void FreePatient(Patient pat);
+    Patient GetPatient(DataBaseWorker& dbw);
+    void FreePatient(DataBaseWorker& dbw);
+    size_t GetVisitsCount(DataBaseWorker& dbw); 
+    void SendVisit(DataBaseWorker& dbw, std::string& drugs, std::string& diag, Patient pat, int visit_id, std::string& date);
 
+    bool IsEmpty();
 
     ~PatientQueue() = default;
 };

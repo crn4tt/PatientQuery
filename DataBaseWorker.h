@@ -1,22 +1,26 @@
+#pragma once
 #include "Patient.h"
+#include "Queue.h"
 #include <pqxx/pqxx>
-
+#include <memory>
 
 class DataBaseWorker
 {
 private:
-    pqxx::connection _conn;
+    std::shared_ptr<pqxx::connection> _conn;
 
 public:
-    DataBaseWorker();
+    DataBaseWorker(const std::string& connection_string);
     
-    void AddVisit(Visit& vis, Patient& pat, int visit_id);
+    DataBaseWorker(const DataBaseWorker&) = delete;
+    DataBaseWorker& operator=(const DataBaseWorker&) = delete;
+
+    void AddVisit(const std::string& drugs, const std::string& diagnosis, Patient& pat, int visit_id, const std::string& date); 
     void DeletePatient(Patient& pat);
 
-    size_t GetPatientsCount();
+    size_t GetVisitsCount();
 
-    Patient GetPatient(int id);
-    std::vector<Visit> GetHistory(int id);
-
+    void GetPatients(Queue<Patient>& result);
+    Visit GetHistory(Patient pat); 
 
 };

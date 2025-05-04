@@ -1,3 +1,4 @@
+#pragma once
 #include "Visit.h"
 #include <iostream>
 #include <sstream>
@@ -7,7 +8,8 @@ private:
     int _id;
 
 public:
-    Patient(int id, std::string name, std::string surname, std::string patronomyc, std::string born_date, std::string gender, int last_visit);
+    Patient();
+    Patient(int id, std::string name, std::string surname, std::string patronomyc, std::string born_date, std::string gender);
 
     std::vector<Visit> History;
 
@@ -16,7 +18,6 @@ public:
     std::string Patronomyc;
     std::string BornDate;
     std::string Gender;
-    int LastVisit;
 
     void Print();
     
