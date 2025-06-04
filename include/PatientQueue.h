@@ -12,10 +12,11 @@ public:
 
     Patient GetPatient(DataBaseWorker& dbw);
     void FreePatient(DataBaseWorker& dbw);
-    size_t GetVisitsCount(DataBaseWorker& dbw); 
-    void SendVisit(DataBaseWorker& dbw, std::string& drugs, std::string& diag, Patient pat, int visit_id, std::string& date);
+    size_t GetVisitsCount(DataBaseWorker& dbw);
+    void SendVisit(DataBaseWorker& dbw, const std::string& drugs, const std::string& diag,
+                   const Patient& pat, int visit_id, const std::string& date);
 
-    bool IsEmpty();
+    bool IsEmpty() const;
 
     ~PatientQueue() = default;
 };

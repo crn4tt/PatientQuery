@@ -1,22 +1,19 @@
 #include "DataBaseWorker.h"
 
 
-DataBaseWorker::DataBaseWorker(const std::string& connection_string) : _conn(std::make_shared<pqxx::connection>(connection_string)){
-
+DataBaseWorker::DataBaseWorker(const std::string& connection_string) {
     try {
         _conn = std::make_shared<pqxx::connection>(connection_string);
-        
     } catch (const std::exception& e) {
-
         std::cerr << "Connection failed: " << e.what() << std::endl;
         throw;
     }
-
 }
 
 
 
-void DataBaseWorker::AddVisit(const std::string& drugs, const std::string& diagnosis, Patient& pat, int visit_id, const std::string& date) {
+void DataBaseWorker::AddVisit(const std::string& drugs, const std::string& diagnosis,
+                              const Patient& pat, int visit_id, const std::string& date) {
     try {
         pqxx::work txn(*_conn);
         txn.exec_params(
@@ -72,7 +69,7 @@ size_t DataBaseWorker::GetVisitsCount() {
     }
 }
 
-Visit DataBaseWorker::GetHistory(Patient pat){
+Visit DataBaseWorker::GetHistory(const Patient& pat){
    try{ 
         pqxx::work txn(*_conn);
         
@@ -99,7 +96,7 @@ Visit DataBaseWorker::GetHistory(Patient pat){
 }
 
 
-void DataBaseWorker::DeletePatient(Patient& pat){
+void DataBaseWorker::DeletePatient(const Patient& pat){
     try {
         pqxx::work txn(*_conn);
         
