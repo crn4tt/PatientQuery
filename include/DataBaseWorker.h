@@ -15,12 +15,13 @@ public:
     DataBaseWorker(const DataBaseWorker&) = delete;
     DataBaseWorker& operator=(const DataBaseWorker&) = delete;
 
-    void AddVisit(const std::string& drugs, const std::string& diagnosis, Patient& pat, int visit_id, const std::string& date); 
-    void DeletePatient(Patient& pat);
+    void AddVisit(const std::string& drugs, const std::string& diagnosis,
+                  const Patient& pat, int visit_id, const std::string& date);
+    void DeletePatient(const Patient& pat);
 
     size_t GetVisitsCount();
 
     void GetPatients(Queue<Patient>& result);
-    Visit GetHistory(Patient pat); 
+    Visit GetHistory(const Patient& pat);
 
 };

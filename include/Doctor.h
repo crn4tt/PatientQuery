@@ -1,5 +1,7 @@
 #pragma once
-#include "PatientQueue.h"
+#include "Patient.h"
+#include "Visit.h"
+#include <vector>
 
 class Doctor {
 private:
@@ -9,6 +11,6 @@ private:
 public:
     Doctor() = default;
     void SetPatient(const Patient& patient);
-    Patient GetPat();
+    const Patient& GetPat() const;
     std::vector<std::string> Working();
 };

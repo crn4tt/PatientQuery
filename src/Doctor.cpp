@@ -13,7 +13,7 @@ std::string ToString(std::vector<std::string> vec){
 }
 
 
-Patient Doctor::GetPat(){
+const Patient& Doctor::GetPat() const{
     return _patient;
 }
 

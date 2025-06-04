@@ -22,9 +22,9 @@ std::string getPassword() {
 }
 
 
-int main(){
-    std::string host = "85.192.29.145";
-    std::string port = "5432";
+int main() {
+    const std::string host = "85.192.29.145";
+    const std::string port = "5432";
     std::string dbname, user, password;
 
     std::cout << "Database name: ";
@@ -37,7 +37,7 @@ int main(){
     std::cin.ignore();
     password = getPassword();
     
-    std::string connection_str = 
+    const std::string connection_str =
         "host=" + host + " " +
         "port=" + port + " " +
         "dbname=" + dbname + " " +
