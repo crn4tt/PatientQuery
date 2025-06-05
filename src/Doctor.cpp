@@ -1,6 +1,8 @@
 #include "Doctor.h"
 
-std::string ToString(std::vector<std::string> vec){
+namespace clinic {
+
+std::string ToString(const std::vector<std::string>& vec) {
     std::string tmp;
     for(std::string str : vec){
         tmp += str + ",";
@@ -13,7 +15,7 @@ std::string ToString(std::vector<std::string> vec){
 }
 
 
-Patient Doctor::GetPat(){
+const Patient& Doctor::GetPat() const{
     return _patient;
 }
 
@@ -21,7 +23,7 @@ void Doctor::SetPatient(const Patient& pat) {
     _patient = pat;
 }
 
-std::vector<std::string> Doctor::Working(){
+std::vector<std::string> Doctor::Working() {
 
     std::string _diag;
     std::string tmp;
@@ -55,3 +57,5 @@ std::vector<std::string> Doctor::Working(){
 
     return result;
 }
+
+} // namespace clinic

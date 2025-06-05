@@ -1,7 +1,11 @@
 #pragma once
-#include "PatientQueue.h"
+#include "Patient.h"
+#include "Visit.h"
+#include <vector>
 
-class Doctor {
+namespace clinic {
+
+class Doctor final {
 private:
     Patient _patient;
     Visit _visit;
@@ -9,6 +13,8 @@ private:
 public:
     Doctor() = default;
     void SetPatient(const Patient& patient);
-    Patient GetPat();
+    const Patient& GetPat() const;
     std::vector<std::string> Working();
 };
+
+} // namespace clinic

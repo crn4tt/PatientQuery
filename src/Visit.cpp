@@ -1,6 +1,7 @@
 #include "Visit.h"
 #include <iostream>
 
+namespace clinic {
 
 void Visit::Print() const {
 
@@ -14,3 +15,5 @@ void Visit::Print() const {
         std::cout << History[i] << '\n';
      
 }
+
+} // namespace clinic

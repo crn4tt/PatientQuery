@@ -1,11 +1,11 @@
 #include "PatientQueue.h"
 
+namespace clinic {
 
-
-PatientQueue::PatientQueue(DataBaseWorker& dbw):_queuePatient(){   
+PatientQueue::PatientQueue(DataBaseWorker& dbw) : _queuePatient() {
     dbw.GetPatients(_queuePatient);
 
-} 
+}
 
 Patient PatientQueue::GetPatient(DataBaseWorker& dbw){
     _queuePatient.Front().Print();
@@ -26,10 +26,13 @@ void PatientQueue::FreePatient(DataBaseWorker& dbw){
     _queuePatient.Pop();
 }
 
-void PatientQueue::SendVisit(DataBaseWorker& dbw, std::string& drugs, std::string& diag, Patient pat, int visit_id, std::string& date){
+void PatientQueue::SendVisit(DataBaseWorker& dbw, const std::string& drugs, const std::string& diag,
+                             const Patient& pat, int visit_id, const std::string& date){
     dbw.AddVisit(drugs, diag, pat, visit_id, date);
 }
 
-bool PatientQueue::IsEmpty(){
+bool PatientQueue::IsEmpty() const{
     return _queuePatient.IsEmpty();
 }
+
+} // namespace clinic

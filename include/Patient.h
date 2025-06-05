@@ -3,7 +3,9 @@
 #include <iostream>
 #include <sstream>
 
-class Patient{
+namespace clinic {
+
+class Patient final {
 private:
     int _id;
 
@@ -19,7 +21,9 @@ public:
     std::string BornDate;
     std::string Gender;
 
-    void Print();
-    
-    int GetID();
+    void Print() const;
+
+    int GetID() const;
 };
+
+} // namespace clinic

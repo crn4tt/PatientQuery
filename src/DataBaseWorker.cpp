@@ -1,24 +1,22 @@
 #include "DataBaseWorker.h"
 
+namespace clinic {
 
-DataBaseWorker::DataBaseWorker(const std::string& connection_string) : _conn(std::make_shared<pqxx::connection>(connection_string)){
-
-    try {
-        _conn = std::make_shared<pqxx::connection>(connection_string);
-        
-    } catch (const std::exception& e) {
-
-        std::cerr << "Connection failed: " << e.what() << std::endl;
-        throw;
-    }
-
+DataBaseWorker::DataBaseWorker(const std::string& connection_string) try
+    : _conn(connection_string)
+{
+}
+catch (const std::exception& e) {
+    std::cerr << "Connection failed: " << e.what() << std::endl;
+    throw;
 }
 
 
 
-void DataBaseWorker::AddVisit(const std::string& drugs, const std::string& diagnosis, Patient& pat, int visit_id, const std::string& date) {
+void DataBaseWorker::AddVisit(const std::string& drugs, const std::string& diagnosis,
+                              const Patient& pat, int visit_id, const std::string& date) {
     try {
-        pqxx::work txn(*_conn);
+        pqxx::work txn(_conn);
         txn.exec_params(
             "INSERT INTO visits (visit_id, pat_id, visit_date, diagnosis, drugs) "
             "VALUES ($1, $2, $3, $4, $5)",
@@ -38,7 +36,7 @@ void DataBaseWorker::AddVisit(const std::string& drugs, const std::string& diagn
 
 void DataBaseWorker::GetPatients(Queue<Patient>& result) {
     try {
-        pqxx::work txn(*_conn);
+        pqxx::work txn(_conn);
         pqxx::result res = txn.exec("SELECT * FROM patients");
         for (const auto& row : res) {
             Patient current_row = Patient(
@@ -62,7 +60,7 @@ void DataBaseWorker::GetPatients(Queue<Patient>& result) {
 
 size_t DataBaseWorker::GetVisitsCount() {
     try {
-        pqxx::work txn(*_conn);
+        pqxx::work txn(_conn);
         pqxx::result result = txn.exec("SELECT COUNT(*) FROM visits");
         return result[0][0].as<size_t>();
     }
@@ -72,9 +70,9 @@ size_t DataBaseWorker::GetVisitsCount() {
     }
 }
 
-Visit DataBaseWorker::GetHistory(Patient pat){
+Visit DataBaseWorker::GetHistory(const Patient& pat){
    try{ 
-        pqxx::work txn(*_conn);
+        pqxx::work txn(_conn);
         
         Visit result;
         pqxx::result res = txn.exec_params("SELECT * FROM visits WHERE pat_id=$1", pat.GetID());
@@ -99,9 +97,9 @@ Visit DataBaseWorker::GetHistory(Patient pat){
 }
 
 
-void DataBaseWorker::DeletePatient(Patient& pat){
+void DataBaseWorker::DeletePatient(const Patient& pat){
     try {
-        pqxx::work txn(*_conn);
+        pqxx::work txn(_conn);
         
         txn.exec_params(
             "DELETE FROM patients WHERE pat_id=$1",
@@ -116,3 +114,5 @@ void DataBaseWorker::DeletePatient(Patient& pat){
         throw;
     }
 }
+
+} // namespace clinic

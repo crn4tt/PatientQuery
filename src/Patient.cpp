@@ -1,5 +1,6 @@
 #include "Patient.h"
 
+namespace clinic {
 
 Patient::Patient(){
     _id = 0;
@@ -21,7 +22,7 @@ Patient::Patient(int id, std::string name, std::string surname, std::string patr
 
 }
 
-void Patient::Print(){
+void Patient::Print() const{
     std::cout << Name << ' ';
     std::cout << Surname << ' ';
     std::cout << Patronomyc << '\n';
@@ -29,6 +30,9 @@ void Patient::Print(){
     std::cout << Gender << '\n';
 }
 
-int Patient::GetID(){
+int Patient::GetID() const{
     return _id;
 }
+
+} // namespace clinic
+
