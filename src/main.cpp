@@ -3,50 +3,10 @@
 #include <cstdlib>
 #include "PatientQueue.h"
 #include "Doctor.h"
-#include <termios.h> 
-#include <unistd.h>
-
-
-std::string getPassword() {
-    termios oldt;
-    tcgetattr(STDIN_FILENO, &oldt);
-    termios newt = oldt;
-    newt.c_lflag &= ~ECHO;
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-
-    std::string password;
-    std::getline(std::cin, password);
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
-    return password;
-}
-
 
 int main() {
-    const std::string host = "85.192.29.145";
-    const std::string port = "5432";
-    std::string dbname, user, password;
-
-    std::cout << "Database name: ";
-    std::cin >> dbname;
-
-    std::cout << "Username: ";
-    std::cin >> user;
-
-    std::cout << "Password: ";
-    std::cin.ignore();
-    password = getPassword();
-    
-    const std::string connection_str =
-        "host=" + host + " " +
-        "port=" + port + " " +
-        "dbname=" + dbname + " " +
-        "user=" + user + " " +
-        "password=" + password;
-
-    std::cout << "\n";
     Doctor _doc;
-    DataBaseWorker _dbw(connection_str);
+    DataBaseWorker _dbw;
     PatientQueue _queue(_dbw); 
     size_t visit_num = _queue.GetVisitsCount(_dbw);
     std::vector<std::string> cur_work;

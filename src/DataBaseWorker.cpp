@@ -1,115 +1,104 @@
 #include "DataBaseWorker.h"
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <iostream>
+#include <stdexcept>
 
-
-DataBaseWorker::DataBaseWorker(const std::string& connection_string) {
-    try {
-        _conn = std::make_shared<pqxx::connection>(connection_string);
-    } catch (const std::exception& e) {
-        std::cerr << "Connection failed: " << e.what() << std::endl;
-        throw;
-    }
-}
-
-
+DataBaseWorker::DataBaseWorker(const std::string& patientsFile,
+                               const std::string& visitsFile)
+    : _patientsFile(patientsFile), _visitsFile(visitsFile) {}
 
 void DataBaseWorker::AddVisit(const std::string& drugs, const std::string& diagnosis,
-                              const Patient& pat, int visit_id, const std::string& date) {
-    try {
-        pqxx::work txn(*_conn);
-        txn.exec_params(
-            "INSERT INTO visits (visit_id, pat_id, visit_date, diagnosis, drugs) "
-            "VALUES ($1, $2, $3, $4, $5)",
-            visit_id,
-            pat.GetID(),
-            date,
-            diagnosis,
-            drugs
-        );
+                              const Patient& pat, int visit_id, const std::string& date)
+{
+    std::ofstream out(_visitsFile, std::ios::app);
+    if (!out)
+        throw std::runtime_error("Cannot open visits file");
+    out << visit_id << ',' << pat.GetID() << ',' << date << ','
+        << diagnosis << ',' << drugs << '\n';
+}
 
-        txn.commit();
-    } catch (const std::exception& e) {
-        std::cerr << "Error adding patient: " << e.what() << std::endl;
-        throw;
+void DataBaseWorker::GetPatients(Queue<Patient>& result)
+{
+    std::ifstream in(_patientsFile);
+    if (!in)
+        throw std::runtime_error("Cannot open patients file");
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.empty())
+            continue;
+        std::stringstream ss(line);
+        std::string id, name, surname, patronymic, born, gender;
+        std::getline(ss, id, ',');
+        std::getline(ss, name, ',');
+        std::getline(ss, surname, ',');
+        std::getline(ss, patronymic, ',');
+        std::getline(ss, born, ',');
+        std::getline(ss, gender, ',');
+        Patient p(std::stoi(id), name, surname, patronymic, born, gender);
+        result.Push(p);
     }
 }
 
-void DataBaseWorker::GetPatients(Queue<Patient>& result) {
-    try {
-        pqxx::work txn(*_conn);
-        pqxx::result res = txn.exec("SELECT * FROM patients");
-        for (const auto& row : res) {
-            Patient current_row = Patient(
-                row["pat_id"].as<int>(),
-                row["name"].as<std::string>(),
-                row["surname"].as<std::string>(),
-                row["patronomic"].as<std::string>(),
-                row["born_date"].as<std::string>(),
-                row["gender"].as<std::string>()
-            );
-            result.Push(current_row);
-        }
-        
-        txn.commit();
+size_t DataBaseWorker::GetVisitsCount()
+{
+    std::ifstream in(_visitsFile);
+    if (!in)
+        throw std::runtime_error("Cannot open visits file");
+    size_t count = 0;
+    std::string line;
+    while (std::getline(in, line)) {
+        if (!line.empty())
+            ++count;
     }
-    catch (const std::exception& e) {
-        std::cerr << "Error getting patient: " << e.what() << std::endl;
-        throw;
-    }
+    return count;
 }
 
-size_t DataBaseWorker::GetVisitsCount() {
-    try {
-        pqxx::work txn(*_conn);
-        pqxx::result result = txn.exec("SELECT COUNT(*) FROM visits");
-        return result[0][0].as<size_t>();
-    }
-    catch(const std::exception& e) {
-        std::cerr << "Error getting patients: " << e.what() << std::endl;
-        throw;
-    }
-}
-
-Visit DataBaseWorker::GetHistory(const Patient& pat){
-   try{ 
-        pqxx::work txn(*_conn);
-        
-        Visit result;
-        pqxx::result res = txn.exec_params("SELECT * FROM visits WHERE pat_id=$1", pat.GetID());
-
-
-        for (const auto& row : res) {
-            
-            std::string drugs = row["drugs"].is_null() ? "" : row["drugs"].as<std::string>();
+Visit DataBaseWorker::GetHistory(const Patient& pat)
+{
+    std::ifstream in(_visitsFile);
+    if (!in)
+        throw std::runtime_error("Cannot open visits file");
+    Visit result;
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.empty())
+            continue;
+        std::stringstream ss(line);
+        std::string visit_id_str, pat_id_str, date, diagnosis, drugs;
+        std::getline(ss, visit_id_str, ',');
+        std::getline(ss, pat_id_str, ',');
+        std::getline(ss, date, ',');
+        std::getline(ss, diagnosis, ',');
+        std::getline(ss, drugs, ',');
+        if (std::stoi(pat_id_str) == pat.GetID()) {
             result.Drugs.emplace_back(drugs);
-
-            std::string hist = row["diagnosis"].is_null() ? "" : row["diagnosis"].as<std::string>();
-            result.History.emplace_back(hist);
+            result.History.emplace_back(diagnosis);
         }
-
-        txn.commit();
-        return result;
     }
-    catch(const std::exception& e) {
-        std::cerr << "Error getting patient's history: " << e.what() << std::endl;
-        throw;
-    }
+    return result;
 }
 
-
-void DataBaseWorker::DeletePatient(const Patient& pat){
-    try {
-        pqxx::work txn(*_conn);
-        
-        txn.exec_params(
-            "DELETE FROM patients WHERE pat_id=$1",
-            pat.GetID()
-        );
-
-        txn.commit();
-        
+void DataBaseWorker::DeletePatient(const Patient& pat)
+{
+    std::ifstream in(_patientsFile);
+    if (!in)
+        throw std::runtime_error("Cannot open patients file");
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(in, line)) {
+        if (line.empty())
+            continue;
+        std::stringstream ss(line);
+        std::string id;
+        std::getline(ss, id, ',');
+        if (std::stoi(id) != pat.GetID())
+            lines.push_back(line);
     }
-    catch(const std::exception& e) {
-        std::cerr << "Error delete patient: " << e.what() << std::endl;
-        throw;
-    }
+    in.close();
+
+    std::ofstream out(_patientsFile, std::ios::trunc);
+    for (const auto& l : lines)
+        out << l << '\n';
 }
