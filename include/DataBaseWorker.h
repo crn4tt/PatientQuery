@@ -1,16 +1,17 @@
 #pragma once
 #include "Patient.h"
 #include "Queue.h"
-#include <pqxx/pqxx>
-#include <memory>
+#include <string>
 
 class DataBaseWorker
 {
 private:
-    std::shared_ptr<pqxx::connection> _conn;
+    std::string _patientsFile;
+    std::string _visitsFile;
 
 public:
-    DataBaseWorker(const std::string& connection_string);
+    DataBaseWorker(const std::string& patientsFile = "patients.csv",
+                   const std::string& visitsFile = "visits.csv");
     
     DataBaseWorker(const DataBaseWorker&) = delete;
     DataBaseWorker& operator=(const DataBaseWorker&) = delete;
