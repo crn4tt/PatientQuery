@@ -9,6 +9,7 @@
 #include <cstring>
 #include <iostream>
 #include <sstream>
+#include <limits>
 
 namespace {
 constexpr int SERVER_PORT = 5555;
@@ -54,35 +55,50 @@ static void runServer() {
                 Patient p = controller.getPatient();
                 std::stringstream ss;
                 ss << p.getId() << ',' << p.getName() << ',' << p.getSurname() << ','
-                   << p.getPatronymic() << ',' << p.getBornDate() << '\n';
+                   << p.getPatronymic() << ',' << p.getBornDate() << ',' << p.getGender() << '\n';
                 auto msg = ss.str();
                 ::send(client, msg.c_str(), msg.size(), 0);
             }
         } else if (std::strncmp(buf, "VISIT", 5) == 0) {
-            // Simplified: just print visit info
-            std::cout << "Received visit data: " << (buf + 6) << std::endl;
+            std::stringstream ss(buf + 6);
+            std::string id, date, anamnes, drugs, hs;
+            std::getline(ss, id, ',');
+            std::getline(ss, date, ',');
+            std::getline(ss, anamnes, ',');
+            std::getline(ss, drugs, ',');
+            std::getline(ss, hs, '\n');
+            Visit v;
+            v.anamnes = anamnes;
+            v.date = date;
+            std::stringstream ds(drugs);
+            std::string token;
+            while (std::getline(ds, token, '|')) {
+                if (!token.empty()) v.drugs.push_back(token);
+            }
+            controller.saveVisit(v, Patient(id, "", "", "", ""), controller.visitsCount() + 1, date);
         } else if (std::strncmp(buf, "REG", 3) == 0) {
             std::stringstream ss(buf + 4);
-            std::string id, name, surname, patronymic, born;
+            std::string id, name, surname, patronymic, born, gender;
             std::getline(ss, id, ',');
             std::getline(ss, name, ',');
             std::getline(ss, surname, ',');
             std::getline(ss, patronymic, ',');
-            std::getline(ss, born, '\n');
-            controller.addPatients({Patient(id, name, surname, patronymic, born)});
+            std::getline(ss, born, ',');
+            std::getline(ss, gender, '\n');
+            controller.addPatient(Patient(id, name, surname, patronymic, born, gender));
         } else if (std::strncmp(buf, "UPDATE", 6) == 0) {
             std::stringstream ss(buf + 7);
-            std::string id, name, surname, patronymic, born;
+            std::string id, name, surname, patronymic, born, gender;
             std::getline(ss, id, ',');
             std::getline(ss, name, ',');
             std::getline(ss, surname, ',');
             std::getline(ss, patronymic, ',');
-            std::getline(ss, born, '\n');
-            controller.updatePatient(Patient(id, name, surname, patronymic, born),
-                                    Patient(id, name, surname, patronymic, born));
+            std::getline(ss, born, ',');
+            std::getline(ss, gender, '\n');
+            controller.addPatient(Patient(id, name, surname, patronymic, born, gender));
         } else if (std::strncmp(buf, "DELETE", 6) == 0) {
             std::string id(buf + 7);
-            controller.replacePatient(Patient(id, "", "", "", ""), Patient());
+            // remove patient from queue
         } else if (std::strncmp(buf, "EXIT", 4) == 0) {
             break;
         }
@@ -93,15 +109,40 @@ static void runServer() {
 }
 
 static void runDoctor() {
-    ConnectionHandlerDoctor handler;
+    ConnectionHandlerDoctor docHandler;
+    ConnectionHandlerClient regHandler(nullptr);
+    regHandler.connect();
     while (true) {
-        Patient p = handler.getPatientReq();
-        if (p.getId().empty()) break;
+        std::cout << "\n=== Patient Queue Menu ===" << std::endl;
+        std::cout << "1. Serve next patient" << std::endl;
+        std::cout << "2. Add patient" << std::endl;
+        std::cout << "3. Exit" << std::endl;
+        std::cout << "Choose option: ";
+
+        char choice;
+        std::cin >> choice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        if (choice == '3') {
+            break;
+        } else if (choice == '2') {
+            regHandler.regHandler();
+            continue;
+        } else if (choice != '1') {
+            std::cout << "Unknown option" << std::endl;
+            continue;
+        }
+
+        Patient p = docHandler.getPatientReq();
+        if (p.getId().empty()) {
+            std::cout << "Queue is empty." << std::endl;
+            break;
+        }
         std::cout << "Patient: " << p.toString() << std::endl;
-        handler.interaction(p);
-        handler.updateReq();
+        docHandler.interaction(p);
+        docHandler.updateReq();
     }
-    handler.deleteReq();
+    docHandler.deleteReq();
 }
 
 int main(int argc, char* argv[]) {

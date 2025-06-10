@@ -33,7 +33,7 @@ void ConnectionHandlerClient::connect() {
 
 void ConnectionHandlerClient::regHandler() {
     if (connection < 0) return;
-    std::string id, name, surname, patronymic, born;
+    std::string id, name, surname, patronymic, born, gender;
     std::cout << "Enter id: ";
     std::getline(std::cin, id);
     std::cout << "Enter name: ";
@@ -44,9 +44,11 @@ void ConnectionHandlerClient::regHandler() {
     std::getline(std::cin, patronymic);
     std::cout << "Enter birth date: ";
     std::getline(std::cin, born);
+    std::cout << "Enter gender: ";
+    std::getline(std::cin, gender);
 
     std::stringstream ss;
-    ss << "REG," << id << ',' << name << ',' << surname << ',' << patronymic << ',' << born << '\n';
+    ss << "REG," << id << ',' << name << ',' << surname << ',' << patronymic << ',' << born << ',' << gender << '\n';
     auto msg = ss.str();
     ::send(connection, msg.c_str(), msg.size(), 0);
 }
@@ -60,18 +62,19 @@ Patient ConnectionHandlerClient::getPatientReq() {
     if (len <= 0) return {};
     buf[len] = '\0';
     std::stringstream ss(buf);
-    std::string id, name, surname, patronymic, born;
+    std::string id, name, surname, patronymic, born, gender;
     std::getline(ss, id, ',');
     std::getline(ss, name, ',');
     std::getline(ss, surname, ',');
     std::getline(ss, patronymic, ',');
-    std::getline(ss, born, '\n');
-    return Patient(id, name, surname, patronymic, born);
+    std::getline(ss, born, ',');
+    std::getline(ss, gender, '\n');
+    return Patient(id, name, surname, patronymic, born, gender);
 }
 
 void ConnectionHandlerClient::updatePatientReq(const std::string& id) {
     if (connection < 0) return;
-    std::string name, surname, patronymic, born;
+    std::string name, surname, patronymic, born, gender;
     std::cout << "Enter new name: ";
     std::getline(std::cin, name);
     std::cout << "Enter new surname: ";
@@ -80,8 +83,11 @@ void ConnectionHandlerClient::updatePatientReq(const std::string& id) {
     std::getline(std::cin, patronymic);
     std::cout << "Enter new birth date: ";
     std::getline(std::cin, born);
+
+    std::cout << "Enter new gender: ";
+    std::getline(std::cin, gender);
     std::stringstream ss;
-    ss << "UPDATE," << id << ',' << name << ',' << surname << ',' << patronymic << ',' << born << '\n';
+    ss << "UPDATE," << id << ',' << name << ',' << surname << ',' << patronymic << ',' << born << ',' << gender << '\n';
     auto msg = ss.str();
     ::send(connection, msg.c_str(), msg.size(), 0);
 }

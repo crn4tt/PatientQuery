@@ -56,7 +56,7 @@ void ConnectionHandlerDoctor::interaction(const Patient& p) {
     Visit v = doc.performExamination();
 
     std::stringstream ss;
-    ss << "VISIT," << p.getId() << ',' << v.anamnes << ',';
+    ss << "VISIT," << p.getId() << ',' << v.date << ',' << v.anamnes << ',';
     for (size_t i = 0; i < v.drugs.size(); ++i) {
         ss << v.drugs[i];
         if (i + 1 < v.drugs.size()) ss << '|';

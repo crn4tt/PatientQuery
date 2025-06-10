@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <string>
 #include "Queue.hpp"
 #include "DatabaseWorker.hpp"
 #include "Patient.hpp"
@@ -13,8 +14,8 @@ public:
     PatientController();
     bool hasPatients() const { return !queuePat.isEmpty(); }
     Patient getPatient();
-    void addPatients(const std::vector<Patient>& list);
-    void updatePatient(const Patient& oldP, const Patient& newP);
-    void replacePatient(const Patient& oldP, const Patient& newP);
+    void addPatient(const Patient& p);
+    void saveVisit(const Visit& v, const Patient& p, int visitId, const std::string& date);
+    size_t visitsCount() const;
 };
 

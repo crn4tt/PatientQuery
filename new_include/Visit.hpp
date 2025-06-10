@@ -7,5 +7,6 @@ public:
     std::vector<std::string> drugs;
     std::vector<std::string> hs;
     std::string anamnes;
+    std::string date;
 };
 
