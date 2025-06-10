@@ -1,4 +1,5 @@
 #include "Doctor.h"
+#include <limits>
 
 std::string ToString(std::vector<std::string> vec){
     std::string tmp;
@@ -21,34 +22,27 @@ void Doctor::SetPatient(const Patient& pat) {
     _patient = pat;
 }
 
-std::vector<std::string> Doctor::Working(){
-
+std::vector<std::string> Doctor::Working() {
     std::string _diag;
     std::string tmp;
     std::string _drug;
 
-    std::cout << "Write diagnosis:\n";
-    getline(std::cin, _diag);
-    std::cout << "\n";
+    std::cout << "Enter diagnosis: ";
+    std::getline(std::cin, _diag);
 
-
-    std::cout << "Write drugs(insert 0 to stop):\n";
+    std::cout << "Enter drugs (0 to stop): ";
     std::cin >> tmp;
-    
-    while (tmp[0] != '0') {
+    while (tmp != "0") {
         _drug += tmp + " ";
         std::cin >> tmp;
-    } 
-    
-    std::cin.ignore(); 
-    
-    std::cout << "Write date(yyyy-mm-dd): \n";
+    }
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    std::cout << "Enter visit date (yyyy-mm-dd): ";
     std::string _date;
-    getline(std::cin, _date);
-    std::cout << "\n";
+    std::getline(std::cin, _date);
 
     std::vector<std::string> result(3);
-
     result[0] = _drug;
     result[1] = _diag;
     result[2] = _date;

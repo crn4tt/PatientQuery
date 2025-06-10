@@ -21,12 +21,12 @@ Patient::Patient(int id, std::string name, std::string surname, std::string patr
 
 }
 
-void Patient::Print() const{
-    std::cout << Name << ' ';
-    std::cout << Surname << ' ';
-    std::cout << Patronomyc << '\n';
-    std::cout << BornDate << '\n';
-    std::cout << Gender << '\n';
+void Patient::Print() const {
+    std::cout << "\n==== Patient Information ====" << std::endl;
+    std::cout << "Name: " << Name << ' ' << Surname << ' ' << Patronomyc
+              << std::endl;
+    std::cout << "Date of birth: " << BornDate << std::endl;
+    std::cout << "Gender: " << Gender << std::endl << std::endl;
 }
 
 int Patient::GetID() const{
