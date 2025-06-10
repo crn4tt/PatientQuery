@@ -34,3 +34,8 @@ void PatientQueue::SendVisit(DataBaseWorker& dbw, const std::string& drugs, cons
 bool PatientQueue::IsEmpty() const{
     return _queuePatient.IsEmpty();
 }
+
+void PatientQueue::AddPatient(const Patient& pat)
+{
+    _queuePatient.Push(pat);
+}

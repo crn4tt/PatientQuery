@@ -15,7 +15,8 @@ void DataBaseWorker::AddVisit(const std::string& drugs, const std::string& diagn
     std::ofstream out(_visitsFile, std::ios::app);
     if (!out)
         throw std::runtime_error("Cannot open visits file");
-    out << visit_id << ',' << pat.GetID() << ',' << date << ','
+    std::string full_name = pat.Name + ' ' + pat.Surname + ' ' + pat.Patronomyc;
+    out << visit_id << ',' << full_name << ',' << date << ','
         << diagnosis << ',' << drugs << '\n';
 }
 
@@ -66,13 +67,14 @@ Visit DataBaseWorker::GetHistory(const Patient& pat)
         if (line.empty())
             continue;
         std::stringstream ss(line);
-        std::string visit_id_str, pat_id_str, date, diagnosis, drugs;
+        std::string visit_id_str, pat_name, date, diagnosis, drugs;
         std::getline(ss, visit_id_str, ',');
-        std::getline(ss, pat_id_str, ',');
+        std::getline(ss, pat_name, ',');
         std::getline(ss, date, ',');
         std::getline(ss, diagnosis, ',');
         std::getline(ss, drugs, ',');
-        if (std::stoi(pat_id_str) == pat.GetID()) {
+        std::string full_name = pat.Name + " " + pat.Surname + " " + pat.Patronomyc;
+        if (pat_name == full_name) {
             result.Drugs.emplace_back(drugs);
             result.History.emplace_back(diagnosis);
         }
@@ -101,4 +103,37 @@ void DataBaseWorker::DeletePatient(const Patient& pat)
     std::ofstream out(_patientsFile, std::ios::trunc);
     for (const auto& l : lines)
         out << l << '\n';
+}
+
+Patient DataBaseWorker::AddPatient(const std::string& name, const std::string& surname,
+                                   const std::string& patronomyc,
+                                   const std::string& born_date,
+                                   const std::string& gender)
+{
+    // Determine next ID
+    size_t next_id = 1;
+    std::ifstream in(_patientsFile);
+    if (in) {
+        std::string line;
+        while (std::getline(in, line)) {
+            if (line.empty())
+                continue;
+            std::stringstream ss(line);
+            std::string id;
+            std::getline(ss, id, ',');
+            size_t num = std::stoul(id);
+            if (num >= next_id)
+                next_id = num + 1;
+        }
+        in.close();
+    }
+
+    std::ofstream out(_patientsFile, std::ios::app);
+    if (!out)
+        throw std::runtime_error("Cannot open patients file");
+    out << next_id << ',' << name << ',' << surname << ',' << patronomyc << ','
+        << born_date << ',' << gender << '\n';
+
+    return Patient(static_cast<int>(next_id), name, surname, patronomyc,
+                   born_date, gender);
 }

@@ -15,15 +15,32 @@ int main() {
     while (true) {
         std::cout << "\n=== Patient Queue Menu ===" << std::endl;
         std::cout << "1. Serve next patient" << std::endl;
-        std::cout << "2. Exit" << std::endl;
+        std::cout << "2. Add patient" << std::endl;
+        std::cout << "3. Exit" << std::endl;
         std::cout << "Choose option: ";
 
         char choice;
         std::cin >> choice;
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-        if (choice == '2')
+        if (choice == '3')
             break;
+        if (choice == '2') {
+            std::string name, surname, patronymic, born, gender;
+            std::cout << "Name: ";
+            std::getline(std::cin, name);
+            std::cout << "Surname: ";
+            std::getline(std::cin, surname);
+            std::cout << "Patronymic: ";
+            std::getline(std::cin, patronymic);
+            std::cout << "Date of birth (yyyy-mm-dd): ";
+            std::getline(std::cin, born);
+            std::cout << "Gender (M/F): ";
+            std::getline(std::cin, gender);
+            Patient new_pat = dbw.AddPatient(name, surname, patronymic, born, gender);
+            queue.AddPatient(new_pat);
+            continue;
+        }
         if (choice != '1') {
             std::cout << "Unknown option" << std::endl;
             continue;

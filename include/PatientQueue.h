@@ -16,6 +16,8 @@ public:
     void SendVisit(DataBaseWorker& dbw, const std::string& drugs, const std::string& diag,
                    const Patient& pat, int visit_id, const std::string& date);
 
+    void AddPatient(const Patient& pat);
+
     bool IsEmpty() const;
 
     ~PatientQueue() = default;

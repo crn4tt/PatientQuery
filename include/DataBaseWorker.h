@@ -20,6 +20,10 @@ public:
                   const Patient& pat, int visit_id, const std::string& date);
     void DeletePatient(const Patient& pat);
 
+    Patient AddPatient(const std::string& name, const std::string& surname,
+                       const std::string& patronomyc,
+                       const std::string& born_date, const std::string& gender);
+
     size_t GetVisitsCount();
 
     void GetPatients(Queue<Patient>& result);
