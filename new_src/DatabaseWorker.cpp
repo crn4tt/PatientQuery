@@ -85,18 +85,6 @@ void DatabaseWorker::deletePatient(const Patient& pat) {
     std::ifstream in(patientsFile);
     if (!in)
         throw std::runtime_error("Cannot open patients file");
-        std::string pid, name, surname, patronymic, born;
-        std::getline(ss, pid, ',');
-        std::getline(ss, name, ',');
-        std::getline(ss, surname, ',');
-        std::getline(ss, patronymic, ',');
-        std::getline(ss, born, ',');
-        if (pid == id)
-            return Patient(pid, name, surname, patronymic, born);
-    }
-    return {};
-}
-
     std::vector<std::string> lines;
     std::string line;
     while (std::getline(in, line)) {
