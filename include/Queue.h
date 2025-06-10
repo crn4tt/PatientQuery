@@ -1,35 +1,95 @@
 #pragma once
 
-#include <queue>
+#include <memory>
 #include <stdexcept>
 
 /**
- * Simple wrapper around std::queue providing the minimal interface
- * required by the application. Using the STL container avoids manual
- * memory management and follows RAII principles.
+ * Manually implemented queue using a singly linked list.  Memory
+ * management is handled via std::unique_ptr to avoid leaks and follow
+ * RAII principles.
  */
 template <typename T>
 class Queue
 {
 private:
-    std::queue<T> _data;
+    struct Node
+    {
+        T data;
+        std::unique_ptr<Node> next;
+
+        explicit Node(const T& value) : data(value), next(nullptr) {}
+        explicit Node(T&& value) : data(std::move(value)), next(nullptr) {}
+    };
+
+    std::unique_ptr<Node> _head;
+    Node* _tail{nullptr};
+    size_t _size{0};
 
 public:
     Queue() = default;
+    Queue(const Queue&) = delete;
+    Queue& operator=(const Queue&) = delete;
+    Queue(Queue&&) noexcept = default;
+    Queue& operator=(Queue&&) noexcept = default;
+    ~Queue() = default;
 
-    bool IsEmpty() const { return _data.empty(); }
+    bool IsEmpty() const { return _size == 0; }
 
-    void Push(const T& value) { _data.push(value); }
+    void Push(const T& value)
+    {
+        auto newNode = std::make_unique<Node>(value);
+        Node* newTail = newNode.get();
+        if (_tail)
+        {
+            _tail->next = std::move(newNode);
+        }
+        else
+        {
+            _head = std::move(newNode);
+        }
+        _tail = newTail;
+        ++_size;
+    }
+
+    void Push(T&& value)
+    {
+        auto newNode = std::make_unique<Node>(std::move(value));
+        Node* newTail = newNode.get();
+        if (_tail)
+        {
+            _tail->next = std::move(newNode);
+        }
+        else
+        {
+            _head = std::move(newNode);
+        }
+        _tail = newTail;
+        ++_size;
+    }
 
     void Pop()
     {
         if (IsEmpty())
             throw std::runtime_error("Queue is empty");
-        _data.pop();
+        _head = std::move(_head->next);
+        if (!_head)
+            _tail = nullptr;
+        --_size;
     }
 
-    T& Front() { return _data.front(); }
-    const T& Front() const { return _data.front(); }
+    T& Front()
+    {
+        if (IsEmpty())
+            throw std::runtime_error("Queue is empty");
+        return _head->data;
+    }
 
-    size_t Size() const { return _data.size(); }
+    const T& Front() const
+    {
+        if (IsEmpty())
+            throw std::runtime_error("Queue is empty");
+        return _head->data;
+    }
+
+    size_t Size() const { return _size; }
 };
