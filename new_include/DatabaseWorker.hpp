@@ -7,9 +7,11 @@ class DatabaseWorker {
 private:
     std::string patientsFile;
     std::string visitsFile;
+    std::string allPatientsFile;
 public:
     DatabaseWorker(const std::string& patientsFile = "patients.csv",
-                   const std::string& visitsFile = "visits.csv");
+                   const std::string& visitsFile = "visits.csv",
+                   const std::string& allPatientsFile = "patients_all.csv");
     DatabaseWorker(const DatabaseWorker&) = delete;
     DatabaseWorker& operator=(const DatabaseWorker&) = delete;
 
