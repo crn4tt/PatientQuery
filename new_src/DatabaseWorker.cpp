@@ -5,8 +5,9 @@
 #include <stdexcept>
 
 DatabaseWorker::DatabaseWorker(const std::string& patFile,
-                               const std::string& visFile)
-    : patientsFile(patFile), visitsFile(visFile) {}
+                               const std::string& visFile,
+                               const std::string& allPatFile)
+    : patientsFile(patFile), visitsFile(visFile), allPatientsFile(allPatFile) {}
 
 void DatabaseWorker::addVisit(const std::string& drugs, const std::string& diagnosis,
                               const Patient& pat, int visitId, const std::string& date) {
@@ -106,7 +107,7 @@ Patient DatabaseWorker::addPatient(const std::string& name, const std::string& s
                                    const std::string& patronymic,
                                    const std::string& bornDate, const std::string& gender) {
     size_t nextId = 1;
-    std::ifstream in(patientsFile);
+    std::ifstream in(allPatientsFile);
     if (in) {
         std::string line;
         while (std::getline(in, line)) {
@@ -122,12 +123,19 @@ Patient DatabaseWorker::addPatient(const std::string& name, const std::string& s
         in.close();
     }
 
-    std::ofstream out(patientsFile, std::ios::app);
-    if (!out)
+    std::ofstream outCur(patientsFile, std::ios::app);
+    if (!outCur)
         throw std::runtime_error("Cannot open patients file");
-    out << nextId << ',' << name << ',' << surname << ',' << patronymic << ','
-        << bornDate << ',' << gender << '\n';
+    outCur << nextId << ',' << name << ',' << surname << ',' << patronymic << ','
+          << bornDate << ',' << gender << '\n';
 
-    return Patient(std::to_string(nextId), name, surname, patronymic, bornDate, gender);
+    std::ofstream outAll(allPatientsFile, std::ios::app);
+    if (!outAll)
+        throw std::runtime_error("Cannot open all patients file");
+    outAll << nextId << ',' << name << ',' << surname << ',' << patronymic << ','
+           << bornDate << ',' << gender << '\n';
+
+    return Patient(std::to_string(nextId), name, surname, patronymic, bornDate,
+                   gender);
 }
 
