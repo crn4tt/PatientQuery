@@ -83,6 +83,7 @@ void ConnectionHandlerClient::updatePatientReq(const std::string& id) {
     std::getline(std::cin, patronymic);
     std::cout << "Enter new birth date: ";
     std::getline(std::cin, born);
+
     std::cout << "Enter new gender: ";
     std::getline(std::cin, gender);
     std::stringstream ss;

@@ -31,10 +31,8 @@ Visit Doctor::performExamination() {
     if (!visit) visit = std::make_shared<Visit>();
     visit->drugs.clear();
     visit->hs.clear();
-
     std::cout << "Enter visit date (yyyy-mm-dd): ";
     std::getline(std::cin, visit->date);
-
     std::string input;
     std::cout << "Enter diagnosis: ";
     std::getline(std::cin, visit->anamnes);
