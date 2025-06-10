@@ -44,12 +44,8 @@ Visit Doctor::performExamination() {
         std::cout << "drug: ";
     }
 
-    std::cout << "Enter health services (type 'done' to finish): ";
-    while (std::getline(std::cin, input)) {
-        if (input == "done") break;
-        if (!input.empty()) visit->hs.push_back(input);
-        std::cout << "service: ";
-    }
+    // Skipping input of additional health services as they are not required
+    // by current workflow. The list will remain empty.
 
     return *visit;
 }
