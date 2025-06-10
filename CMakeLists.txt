@@ -17,3 +17,6 @@ set(SOURCES
 add_executable(Patient_Queue ${SOURCES})
 
 target_include_directories(Patient_Queue PRIVATE ${CMAKE_SOURCE_DIR}/new_include)
+
+find_package(Threads REQUIRED)
+target_link_libraries(Patient_Queue PRIVATE Threads::Threads)
